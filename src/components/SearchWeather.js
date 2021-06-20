@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import "./App.css";
+import "../App.css";
 import "@shopify/polaris/dist/styles.css";
 import { DisplayText } from "@shopify/polaris";
-import axios from "axios";
 
 
 // доступ к API сервиса погоды
@@ -12,61 +11,33 @@ const api = {
 };
 
 function App() {
-  axios({
-    method: 'post',
-    url: 'https://jsonplaceholder.typicode.com/posts',
-    params: {
-      user_key_id: 'USER_KEY_ID',
-    },
-    data: {
-      title: 'new_title',
-      body: 'new_body',
-      userId: 'userid'
-    },
-    headers: {
-      "Content-type": "application/json; charset=UTF-8"
-    }
-  })
-  .then(function(response) {
-    console.log('Ответ сервера успешно получен!');
-    console.log(response.data);
-  })
-  .catch(function(error) {
-    console.log(error);
-  });
-  var url =
-    "https://suggestions.dadata.ru/suggestions/api/4_1/rs/iplocate/address?ip=";
-  var token = "7612dc8608916f867f8fc970a07bc7c079254fb1";
-  var query = fetch("https://ipapi.co/json/");
+  //Добавление в избранное
+  function addFav(city) {
+    localStorage.getItem("Counter")
+      ? localStorage.setItem("Counter", localStorage.getItem("Counter") + 1)
+      : localStorage.setItem("Counter", 1);
+    localStorage.setItem(localStorage.getItem("Counter"), city);
+    console.log(localStorage.getItem("Counter"));
+  }
 
-  var options = {
-    method: "GET",
-    mode: "cors",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: "Token " + token,
-    },
-  };
   // действия при изменении города в поле ввода
-  fetch(url + query, options)
-    .then((response) => response.text())
-    .then((result) => console.log(result))
-    .catch((error) => console.log("error", error));
-  const city = "Белгород";
+  const [city, setCity] = useState("");
 
   // действия с данными погоды
   const [weather, setWeather] = useState({});
 
   // обработчик, который срабатывает когда нажата клавиша Enter
   const search = (evt) => {
-    fetch(`${api.base}weather?q=${city}&units=metric&appid=${api.key}`) // отправляем запрос
-      .then((res) => res.json()) // ответ преобразуем в json
-      .then((result) => {
-        // работаем с результатом
-        setWeather(result);
-        console.log(result);
-      });
+    if (evt.key === "Enter") {
+      fetch(`${api.base}weather?q=${city}&units=metric&appid=${api.key}`) // отправляем запрос
+        .then((res) => res.json()) // ответ преобразуем в json
+        .then((result) => {
+          // работаем с результатом
+          setWeather(result);
+          setCity("");
+          console.log(result);
+        });
+    }
   };
 
   // форматирование даты
@@ -114,10 +85,17 @@ function App() {
       }
     >
       <main>
-        <DisplayText size="extraLarge">
-          Погода в вашем городе:
-          {search()}
-        </DisplayText>
+      <DisplayText size="extraLarge">Погода в городе: {weather.name}</DisplayText>
+        <div className="search-box">
+          <input
+            type="text"
+            className="search-bar"
+            placeholder="Поиск..."
+            onChange={(e) => setCity(e.target.value)}
+            value={city}
+            onKeyPress={search}
+          />
+        </div>
         {typeof weather.main != "undefined" ? (
           <div>
             <div className="location-box">
@@ -130,6 +108,7 @@ function App() {
               <div className="temp">{Math.round(weather.main.temp)}°c</div>
               <div className="weather">{weather.weather[0].main}</div>
             </div>
+            <button onClick={addFav(city)}>Добавить в избранное</button>
           </div>
         ) : (
           ""
