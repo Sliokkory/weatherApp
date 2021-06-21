@@ -3,12 +3,13 @@ import "../App.css";
 import "@shopify/polaris/dist/styles.css";
 import { DisplayText } from "@shopify/polaris";
 
-
 // доступ к API сервиса погоды
 const api = {
-  key: "c7616da4b68205c2f3ae73df2c31d177",
+  key: "4d03d2d9918bb01778570f2e2bd54d41",
   base: "http://api.openweathermap.org/data/2.5/",
 };
+
+let counter = 0;
 
 function App() {
   //Добавление в избранное
@@ -29,14 +30,18 @@ function App() {
   // обработчик, который срабатывает когда нажата клавиша Enter
   const search = (evt) => {
     if (evt.key === "Enter") {
-      fetch(`${api.base}weather?q=${city}&units=metric&appid=${api.key}`) // отправляем запрос
-        .then((res) => res.json()) // ответ преобразуем в json
-        .then((result) => {
-          // работаем с результатом
-          setWeather(result);
-          setCity("");
-          console.log(result);
-        });
+      counter = 0;
+      if (counter === 0) {
+        fetch(`${api.base}weather?q=${city}&units=metric&appid=${api.key}`) // отправляем запрос
+          .then((res) => res.json()) // ответ преобразуем в json
+          .then((result) => {
+            // работаем с результатом
+            setWeather(result);
+            setCity("");
+            console.log(result);
+            counter = 1;
+          });
+      }
     }
   };
 
@@ -85,7 +90,9 @@ function App() {
       }
     >
       <main>
-      <DisplayText size="extraLarge">Погода в городе: {weather.name}</DisplayText>
+        <DisplayText size="extraLarge">
+          Погода в городе: {weather.name}
+        </DisplayText>
         <div className="search-box">
           <input
             type="text"

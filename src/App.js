@@ -2,72 +2,58 @@ import React, { useState } from "react";
 import "./App.css";
 import "@shopify/polaris/dist/styles.css";
 import { DisplayText } from "@shopify/polaris";
-import axios from "axios";
-
 
 // доступ к API сервиса погоды
 const api = {
-  key: "c7616da4b68205c2f3ae73df2c31d177",
+  key: "4d03d2d9918bb01778570f2e2bd54d41",
   base: "http://api.openweathermap.org/data/2.5/",
 };
 
-function App() {
-  axios({
-    method: 'post',
-    url: 'https://jsonplaceholder.typicode.com/posts',
-    params: {
-      user_key_id: 'USER_KEY_ID',
-    },
-    data: {
-      title: 'new_title',
-      body: 'new_body',
-      userId: 'userid'
-    },
-    headers: {
-      "Content-type": "application/json; charset=UTF-8"
-    }
-  })
-  .then(function(response) {
-    console.log('Ответ сервера успешно получен!');
-    console.log(response.data);
-  })
-  .catch(function(error) {
-    console.log(error);
-  });
-  var url =
-    "https://suggestions.dadata.ru/suggestions/api/4_1/rs/iplocate/address?ip=";
-  var token = "7612dc8608916f867f8fc970a07bc7c079254fb1";
-  var query = fetch("https://ipapi.co/json/");
+let counter = 0;
 
-  var options = {
-    method: "GET",
-    mode: "cors",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: "Token " + token,
-    },
-  };
-  // действия при изменении города в поле ввода
-  fetch(url + query, options)
-    .then((response) => response.text())
-    .then((result) => console.log(result))
-    .catch((error) => console.log("error", error));
-  const city = "Белгород";
+let city;
+
+function App() {
+  function currentGeo() {
+    if (navigator.geolocation) {
+      // Геолокация доступна
+      navigator.geolocation.getCurrentPosition(function (position) {
+        // Текущие координаты.
+        let lat = position.coords.latitude;
+        let lng = position.coords.longitude;
+        fetch(
+          `http://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lng}&limit=1&appid=${api.key}`
+        ) // отправляем запрос
+          .then((res) => res.json()) // ответ преобразуем в json
+          .then((result) => {
+            // работаем с результатом
+            city = result[0].name;
+            getWaether();
+          });
+      });
+    } else {
+      // Геолокация не доступна
+      console.log(
+        "Геолокация не доступна, для отображения погоды разрешите доступ к отслеживанию текущего местоположения"
+      );
+    }
+  }
 
   // действия с данными погоды
   const [weather, setWeather] = useState({});
 
-  // обработчик, который срабатывает когда нажата клавиша Enter
-  const search = (evt) => {
-    fetch(`${api.base}weather?q=${city}&units=metric&appid=${api.key}`) // отправляем запрос
+  function getWaether(env) {
+    if (counter === 0) {
+    fetch(`${api.base}weather?q=${city}&units=metric&limit=1&appid=${api.key}`) // отправляем запрос
       .then((res) => res.json()) // ответ преобразуем в json
       .then((result) => {
         // работаем с результатом
         setWeather(result);
         console.log(result);
       });
-  };
+      counter = 1;
+    }
+  }
 
   // форматирование даты
   const format_date = (d) => {
@@ -116,7 +102,7 @@ function App() {
       <main>
         <DisplayText size="extraLarge">
           Погода в вашем городе:
-          {search()}
+          {currentGeo()}
         </DisplayText>
         {typeof weather.main != "undefined" ? (
           <div>
