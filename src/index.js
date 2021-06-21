@@ -20,9 +20,6 @@ ReactDOM.render(
         <Card sectioned>
           <SearchWeather />
         </Card>
-        {/* <Card sectioned>
-          <Favourites />
-        </Card> */}
       </Page>
     </AppProvider>
     ,

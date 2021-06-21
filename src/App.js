@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./App.css";
 import "@shopify/polaris/dist/styles.css";
-import { DisplayText } from "@shopify/polaris";
+import { DisplayText, TextContainer } from "@shopify/polaris";
 
 // доступ к API сервиса погоды
 const api = {
@@ -44,13 +44,15 @@ function App() {
 
   function getWaether(env) {
     if (counter === 0) {
-    fetch(`${api.base}weather?q=${city}&units=metric&limit=1&appid=${api.key}`) // отправляем запрос
-      .then((res) => res.json()) // ответ преобразуем в json
-      .then((result) => {
-        // работаем с результатом
-        setWeather(result);
-        console.log(result);
-      });
+      fetch(
+        `${api.base}weather?q=${city}&units=metric&limit=1&appid=${api.key}`
+      ) // отправляем запрос
+        .then((res) => res.json()) // ответ преобразуем в json
+        .then((result) => {
+          // работаем с результатом
+          setWeather(result);
+          console.log(result);
+        });
       counter = 1;
     }
   }
@@ -90,33 +92,27 @@ function App() {
   };
   // JSX разметка
   return (
-    <div
-      className={
-        typeof weather.main != "undefined"
-          ? weather.main.temp > 16
-            ? "app warm"
-            : "app"
-          : "app"
-      }
-    >
+    <div>
       <main>
-        <DisplayText size="extraLarge">
-          Погода в вашем городе:
-          {currentGeo()}
-        </DisplayText>
-        {typeof weather.main != "undefined" ? (
-          <div>
-            <div className="location-box">
-              <div className="location">
-                {weather.name}, {weather.sys.country}
-              </div>
-              <div className="date">{format_date(new Date())}</div>
-            </div>
-            <div className="weather-box">
-              <div className="temp">{Math.round(weather.main.temp)}°c</div>
-              <div className="weather">{weather.weather[0].main}</div>
-            </div>
+        <TextContainer>
+          <div className="head">
+          <DisplayText size="extraLarge">
+            Погода в вашем городе:
+            {currentGeo()}
+          </DisplayText>
           </div>
+        </TextContainer>
+        {typeof weather.main != "undefined" ? (
+          <TextContainer>
+            <DisplayText size="medium">
+              {weather.name}, {weather.sys.country}
+            </DisplayText>
+            <DisplayText size="small">{format_date(new Date())}</DisplayText>
+            <DisplayText size="small">
+              {Math.round(weather.main.temp)}°c
+            </DisplayText>
+            <DisplayText size="small">{weather.weather[0].main}</DisplayText>
+          </TextContainer>
         ) : (
           ""
         )}
